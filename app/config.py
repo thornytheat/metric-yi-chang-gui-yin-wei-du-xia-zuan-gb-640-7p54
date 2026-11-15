@@ -57,12 +57,26 @@ COLUMN_ALIASES = {
     "updated_at": "updated_at",
     "更新时间": "updated_at",
     "snapshot_at": "updated_at",
+    "op_flag": "op_flag",
+    "操作": "op_flag",
+    "操作标记": "op_flag",
+    "rev_op": "op_flag",
+    "report_op": "op_flag",
 }
 
 REQUIRED_COLUMNS = (
     "hotel_code", "hotel_name", "channel", "biz_date",
     "rooms_available", "rooms_sold", "adr", "revenue_net", "updated_at",
 )
+
+# 可选列：修订文件用 op_flag 区分常规补报与撤回（WITHDRAW/REVOKE）
+OPTIONAL_COLUMNS = ("op_flag",)
+
+# 撤回语义的操作标记（大小写归一后比较）；其余取值一律按常规补报处理
+WITHDRAW_OPS = frozenset({"withdraw", "revoke", "withdrawal", "delete", "撤回", "撤销"})
+
+# 修订版本号：同一修订文件的幂等键由 输入sha + 父版本 + 规则 + 参数 派生
+REVISION_KIND = "revision"
 
 # 空值哨兵：与 null、空串三态分开，哨兵一律按“未知”处理，不参与合计
 SENTINELS = {"-", "--", "—", "n/a", "na", "null", "none", "nan", "未知", "空", "待补", ""}

@@ -7,6 +7,8 @@ from __future__ import annotations
 from app import config
 
 REQUIRED = config.REQUIRED_COLUMNS
+OPTIONAL = config.OPTIONAL_COLUMNS
+RECOGNIZED = set(REQUIRED) | set(OPTIONAL)
 
 
 def normalize_header(cell: str) -> str:
@@ -28,7 +30,7 @@ def map_columns(header: list[str]) -> tuple[dict[str, int], list[str], list[str]
         if name in mapping:
             duplicated.append(name)
             continue
-        if name in REQUIRED:
+        if name in RECOGNIZED:
             mapping[name] = index
         else:
             unknown.append(raw.strip())
@@ -39,7 +41,7 @@ def map_columns(header: list[str]) -> tuple[dict[str, int], list[str], list[str]
 def is_header_row(cells: list[str]) -> bool:
     hits = 0
     for cell in cells:
-        if normalize_header(cell) in REQUIRED:
+        if normalize_header(cell) in RECOGNIZED:
             hits += 1
     return hits >= max(3, len(REQUIRED) // 2)
 

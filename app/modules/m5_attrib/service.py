@@ -96,6 +96,8 @@ def run_batch(settings: config.Settings, store, data: bytes, input_name: str) ->
     store.save_run(run_manifest.as_dict(), key, summary)
     store.replace_points(run_id, points)
     store.replace_quarantine(run_id, quality.quarantine)
+    # 常规导入成为当前生效版本；修订链的切换在 m8 事务内完成
+    store.set_current_version(run_id, created_at)
     return summary
 
 

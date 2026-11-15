@@ -11,6 +11,7 @@
 | `daily_metrics_header_only.csv` | 93 | UTF-8 | 只有表头 |
 | `daily_metrics_blank.csv` | 102 | UTF-8 | 只有表头 + 3 行全空 |
 | `review_marginal.csv` | 24K | UTF-8 | 复盘样例：3 门店 × 2 渠道 × 62 天（2026-09-20 → 2026-11-20），含边际跌幅与同渠道同步下滑 |
+| `revision_amend.csv` | 0.5K | UTF-8 | 修订样例：带 `op_flag` 列，2 条补报改写 + 1 条撤回 + 1 条补缺桶，用于 `/api/revisions` 整版换版 |
 
 ## 主样例里埋的脏点
 

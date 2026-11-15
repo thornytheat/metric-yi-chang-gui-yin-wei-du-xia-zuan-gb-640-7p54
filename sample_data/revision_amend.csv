@@ -1,0 +1,5 @@
+hotel_code,hotel_name,channel,biz_date,rooms_available,rooms_sold,adr,revenue_net,updated_at,op_flag
+H02,蓝湾·湖畔,ota,2026-11-17,180,98,612.00,59976.00,2026-11-22T03:00:00Z,AMEND
+H02,蓝湾·湖畔,ota,2026-11-18,180,97,615.00,59655.00,2026-11-22T03:05:00Z,AMEND
+H01,蓝湾·滨海,direct,2026-11-10,0,0,, ,2026-11-22T03:10:00Z,WITHDRAW
+H04,蓝湾·山居,member,2026-10-05,160,88,540.00,47520.00,2026-11-22T03:20:00Z,AMEND

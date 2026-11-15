@@ -69,7 +69,7 @@
       <thead><tr><th class="static">卡号</th><th class="static">序列</th><th class="static">区间</th>
         <th class="num static">天数</th><th class="static">方向</th><th class="num static">差额</th>
         <th class="static">主因子</th><th class="num static">复核 z</th><th class="static">置信</th>
-        <th class="static">结论</th><th class="static">标记码</th></tr></thead>
+        <th class="static">结论</th><th class="static">标记码</th><th class="static">已复核</th></tr></thead>
       <tbody>
       {% for item in review.cards %}
         <tr>
@@ -84,6 +84,15 @@
           <td><span class="tag {{ 'normal' if item.confidence == 'high' else ('candidate' if item.confidence == 'medium' else 'confirmed') }}">{{ item.confidence|confidence }}</span></td>
           <td><span class="tag {{ 'pass' if item.verdict == 'stable' else 'confirmed' }}">{{ item.verdict|verdict }}</span></td>
           <td class="mono truncate" title="{{ item.flags|map(attribute='code')|join(' ') }}">{{ item.flags|map(attribute='code')|join(' ') or "-" }}</td>
+          <td>
+            {% set mark = review_marks.get(item.event_id) %}
+            {% if mark %}
+              <span class="tag pass" title="{{ mark.note }} · {{ mark.reviewer }} · {{ mark.created_at }}">{{ mark.verdict }}</span>
+            {% else %}
+              <button class="small review-mark-btn" type="button"
+                      data-run-id="{{ review.run_id }}" data-event-id="{{ item.event_id }}">确认结论</button>
+            {% endif %}
+          </td>
         </tr>
       {% endfor %}
       </tbody>

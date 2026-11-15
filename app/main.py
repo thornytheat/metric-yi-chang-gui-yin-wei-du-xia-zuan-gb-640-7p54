@@ -15,6 +15,7 @@ from app.modules.m4_detect import handler as detect_handler
 from app.modules.m5_attrib import handler as attrib_handler
 from app.modules.m6_export import handler as export_handler
 from app.modules.m7_review import handler as review_handler
+from app.modules.m8_revision import handler as revision_handler
 from app.store import Store
 from app.web import AppState, pages
 
@@ -42,6 +43,9 @@ def create_app(settings: config.Settings | None = None) -> FastAPI:
     app.include_router(detect_handler.router)
     app.include_router(attrib_handler.router)
     app.include_router(export_handler.router)
+    # 修订路由先于复盘注册：/api/review/marks、/api/review/mark 不能被
+    # /api/review/{event_id} 通配吞掉。
+    app.include_router(revision_handler.router)
     app.include_router(review_handler.router)
     app.include_router(pages)
 

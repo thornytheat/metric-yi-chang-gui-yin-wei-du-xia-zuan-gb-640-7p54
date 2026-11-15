@@ -280,11 +280,13 @@ def page_review(request: Request, run_id: str = Query(default="")):
         return _page(request, "review.html", "review", axis_kind="date",
                      axis=axis_for_dates([], ""), review={})
     active_run = result.get("run") or app_state.current_run()
+    marks = app_state.store.load_review_marks(active_run["run_id"])
+    marks_by_event = {mark["event_id"]: mark for mark in marks}
     return _page(request, "review.html", "review", axis_kind="date",
                  axis=axis_for_dates(grid_days(active_run),
                                      summary_watermark(active_run),
                                      result.get("marks", [])),
-                 review=result, run=active_run)
+                 review=result, run=active_run, review_marks=marks_by_event)
 
 
 @pages.get("/attribution", response_class=HTMLResponse)
@@ -313,9 +315,13 @@ def page_batches(request: Request):
     if run is not None:
         reconcile = attrib_service.reconcile(app_state.settings, app_state.store, run["run_id"])
     history = batches.history(runs, 20)
+    revision_history = app_state.store.list_revisions()
+    current_run_id = app_state.store.current_run_id() or ""
     return _page(request, "batches.html", "batches", axis_kind="run",
                  axis=axis_for_runs(history, summary_watermark(run), grid_days(run)),
                  runs=history, reconcile=reconcile,
+                 revision_history=revision_history,
+                 current_run_id=current_run_id,
                  account_notes=quality_service.account_checks(
                      (run or {}).get("summary", {}).get("accounts", {})))
 

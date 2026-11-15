@@ -61,7 +61,8 @@ def _point_dict(row: CoercedRow) -> dict:
 
 
 def evaluate(coerced: list[CoercedRow], reject_rows: list[dict],
-             settings: config.Settings, records_read: int) -> QualityResult:
+             settings: config.Settings, records_read: int,
+             carried_points: int = 0) -> QualityResult:
     screened, rule_rejects = rules.screen(coerced, settings)
     watermark_date = max((row.biz_date for row in screened), default=None)
     resolved = dupes.resolve(screened)
@@ -103,11 +104,14 @@ def evaluate(coerced: list[CoercedRow], reject_rows: list[dict],
                            Decimal("0")).quantize(settings.money_quant)
     quarantine_rows = [entry for entry in entries
                        if reasons.account(entry["code"]) == "quarantine"]
+    withdrawn_rows = [entry for entry in entries if entry["code"] == "W_WITHDRAWN"]
     result.accounts = {
         "rows_read": records_read,
+        "rows_carried": carried_points,
         "rows_accepted": points_valid,
         "rows_superseded": len(resolved.superseded),
         "rows_quarantine": len(quarantine_rows),
+        "rows_withdrawn": len(withdrawn_rows),
         "points_grid": grid_points,
         "points_valid": points_valid,
         "points_rejected": points_rejected,
@@ -128,19 +132,29 @@ def evaluate(coerced: list[CoercedRow], reject_rows: list[dict],
 
 
 def account_checks(accounts: dict) -> list[dict]:
-    """三条等式各自给出“平/不平”，不平要能在页面上一眼看出来。"""
-    rows_ok = (accounts["rows_read"]
+    """三条等式各自给出“平/不平”，不平要能在页面上一眼看出来。
+
+    普通批次 rows_carried=0；修订版本把父版本沿用事实计为“承接行”，
+    行账变为：读入 + 承接 = 采信 + 被覆盖 + 隔离。
+    """
+    carried = int(accounts.get("rows_carried", 0))
+    withdrawn = int(accounts.get("rows_withdrawn", 0))
+    rows_ok = (accounts["rows_read"] + carried
                == accounts["rows_accepted"] + accounts["rows_superseded"]
-               + accounts["rows_quarantine"])
+               + accounts["rows_quarantine"] + withdrawn)
     points_ok = (accounts["points_grid"]
                  == accounts["points_valid"] + accounts["points_rejected"]
                  + accounts["points_missing"])
+    if carried or withdrawn:
+        formula = "读入 + 承接 = 采信 + 被覆盖 + 隔离 + 撤回"
+    else:
+        formula = "读入 = 采信 + 被覆盖 + 隔离"
     return [
         {"name": "行账",
-         "formula": "读入 = 采信 + 被覆盖 + 隔离",
-         "left": accounts["rows_read"],
+         "formula": formula,
+         "left": accounts["rows_read"] + carried,
          "right": accounts["rows_accepted"] + accounts["rows_superseded"]
-         + accounts["rows_quarantine"],
+         + accounts["rows_quarantine"] + withdrawn,
          "ok": rows_ok},
         {"name": "点账",
          "formula": "网格点 = 有效 + 隔离 + 缺失",

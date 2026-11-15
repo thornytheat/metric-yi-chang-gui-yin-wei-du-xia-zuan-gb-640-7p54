@@ -30,6 +30,8 @@ REASONS: dict[str, Reason] = {r.code: r for r in (
     Reason("M_MISSING_BUCKET", "缺桶", "missing", "网格内该门店×渠道×日期没有有效点"),
     Reason("L_LATE_ARRIVAL", "迟到补报", "late", "快照日晚于业务日超过 1 天，仍计入"),
     Reason("L_OUT_OF_WINDOW", "超迟到窗口", "late", "业务日落后水位 3 天以上，仍计入并标记"),
+    Reason("W_WITHDRAWN", "撤回缺失", "missing", "门店渠道撤回该业务日事实，整键不再采信"),
+    Reason("V_REVISED", "修订补报", "notice", "晚到快照改写了既有业务日事实，已并入新版本"),
     Reason("N_CHARSET_FALLBACK", "编码回退", "notice", "按 UTF-8 解码失败，回退 GB18030"),
     Reason("N_CHARSET_MIXED", "同批编码不一致", "notice", "同一批内出现两种编码"),
     Reason("N_BOM_STRIPPED", "剥离 BOM", "notice", "表头首列带 BOM，已剥离"),

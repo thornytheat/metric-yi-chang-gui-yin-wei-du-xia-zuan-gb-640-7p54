@@ -10,9 +10,9 @@ from app.web import state
 router = APIRouter()
 
 
-def _detect(request: Request) -> tuple[dict, dict]:
+def _detect(request: Request, run_id: str = "") -> tuple[dict, dict]:
     app_state = state(request)
-    run = app_state.current_run()
+    run = app_state.store.get_run(run_id) if run_id else app_state.current_run()
     if run is None:
         raise errors.NotFound("还没有运行记录", code="E_NO_RUN")
     points = app_state.store.load_points(run["run_id"])
@@ -27,8 +27,9 @@ def get_anomalies(
     status: str = Query(default=""),
     channel: str = Query(default=""),
     hotel: str = Query(default=""),
+    run_id: str = Query(default=""),
 ):
-    run, result = _detect(request)
+    run, result = _detect(request, run_id)
     detection_rows = service.filter_detections(result["detections"], status, channel, hotel)
     flagged = [item for item in detection_rows
                if item["status"] in ("confirmed", "candidate")]
@@ -46,8 +47,8 @@ def get_anomalies(
 
 
 @router.get("/api/anomalies/timeline")
-def get_timeline(request: Request):
-    run, result = _detect(request)
+def get_timeline(request: Request, run_id: str = Query(default="")):
+    run, result = _detect(request, run_id)
     return {
         "run_id": run["run_id"],
         "summary": result["summary"],
